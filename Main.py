@@ -3,6 +3,8 @@ import pandas as pd
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+
+from Indicators import PrepareDF, indATR
 """
 В PrepareDF функції планується добавити стовпці мін та макс каналу з середніх значеннь з історії, 
 позиція в каналі та кут нахилу тренду
@@ -21,15 +23,12 @@ def main():
     #frame[['high', 'low']].plot()
     #plt.show()
     PrepareDF(df)
+    indATR(df)
 
 
 
 
-def PrepareDF(DF):                                                     # Функція формування повного датафрейму
-    ohlc = DF
-    ohlc.columns = ["date", "open", "high", "low", "close", "volume"]  # Зміна назв колонок датафрейму
-    ohlc = ohlc.set_index('date')
-    print(ohlc)
+
 
 
 
