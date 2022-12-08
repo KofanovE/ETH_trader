@@ -6,6 +6,7 @@ import matplotlib as mpl
 import copy
 from sklearn.linear_model import LinearRegression
 
+
 """
 В PrepareDF функції планується добавити стовпці мін та макс каналу з середніх значеннь з історії,
 позиція в каналі та кут нахилу тренду

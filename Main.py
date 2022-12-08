@@ -12,6 +12,7 @@ from Indicators import *
 В PrepareDF функції планується добавити стовпці мін та макс каналу з середніх значеннь з історії, 
 позиція в каналі та кут нахилу тренду
 """
+
 def main():
 
     pd.set_option('display.max_columns', None)  #форматування відображення DataFrame
