@@ -23,7 +23,7 @@ def PrepareDF(DF):                                                     # Фун�
     df['position_in_channel'] = (df['close'] - df['chanel_min']) / (df['chanel_max'] - df['chanel_min'])
     df = df.set_index('date')
     df = df.reset_index()
-    print(df)
+    return df
 
 
 # True Range and Average True Range indicator
