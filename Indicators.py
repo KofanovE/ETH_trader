@@ -18,6 +18,11 @@ def PrepareDF(DF):                                                     # Фун�
     ohlc = ohlc.set_index('date')
     df = indATR(ohlc, 14).reset_index()
     df['slope'] = indSlope(df['close'], 5)
+    df['chanel_max'] = df['high'].rolling(10).max()
+    df['chanel_min'] = df['low'].rolling(10).min()
+    df['position_in_channel'] = (df['close'] - df['chanel_min']) / (df['chanel_max'] - df['chanel_min'])
+    df = df.set_index('date')
+    df = df.reset_index()
     print(df)
 
 
