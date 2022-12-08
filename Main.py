@@ -40,10 +40,44 @@ def main():
     prepared_df['lcc'] = [None] * lend
     for i in range(4, lend-1):
         if isHCC(prepared_df, i) > 0:
-            print(i)
+            prepared_df.at[i, 'hcc'] = prepared_df['close'][i]
+        if isLCC(prepared_df, i) > 0:
+            prepared_df.at[i, 'lcc'] = prepared_df['close'][i]
 
-    prepared_df[5:20]['close'].plot()
+
+    aa = prepared_df[0:200]
+    aa = aa.reset_index()
+
+    labels = ['close', 'hcc', 'lcc', 'chanel_max', 'chanel_min']
+    labels_line = ['--', '*-', '*-', 'g-', 'r-']
+
+    j = 0
+    x = pd.DataFrame()
+    y = pd.DataFrame()
+    for i in labels:
+        x[j] = aa['index']
+        y[j] = aa[i]
+        j += 1
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+
+    fig.suptitle("Deals")
+    fig.set_size_inches(20, 10)
+
+    for j in range(0, len(labels)):
+        ax1.plot(x[j], y[j], labels_line[j])
+
+    ax1.set_ylabel("Price")
+    ax1.grid(True)
+
+    ax2.plot(x[0], aa['slope'], '.-') #EMA
+    ax3.plot(x[0], aa['position_in_channel'], '.-')
+
+    ax2.grid(True)
+    ax3.grid(True)
+
     plt.show()
+
 
 
 
