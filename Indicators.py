@@ -64,4 +64,28 @@ def indSlope(series, n):
     return np.array(slope_angle)
 
 
+def isLCC(DF, i):
+    df = DF.copy()
+    LCC = 0
+    if df['close'][i] <= df['close'][i+1] and df['close'][i] <= df['close'][i-1] and df['close'][i+1] > df['close'][i-1]:
+        # Local min
+        LCC = i - 1
+    return LCC
 
+def isHCC(DF, i):
+    df = DF.copy()
+    HCC = 0
+    if df['close'][i] >= df['close'][i + 1] and df['close'][i] >= df['close'][i - 1] and df['close'][i + 1] < df['close'][i - 1]:
+        #Local max
+        HCC = i
+    return HCC
+
+def getMaxMinChannel(DF, n):
+    maxx = 0
+    minn = DF['low'].max()
+    for i in range(1, n):
+        if maxx < DF['high'][len(DF) - i]:
+            maxx = DF['high'][len(DF) - i]
+        if minn > DF['low'][len(DF) - i]:
+            minn = DF['low'][len(DF) - i]
+    return maxx, minn
