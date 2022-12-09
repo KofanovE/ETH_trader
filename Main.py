@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -78,8 +80,53 @@ def main():
 
     plt.show()
 
+    # Тестова стратегія
+    #________________________________________________________________________________________________
+    deal = 0
+    position = 0
+    eth_proffit_array = [[20, 1], [40, 1], [60, 2], [80, 2], [100, 2], [150, 1], [200, 1], [200, 0]]
 
+    for i in range(4, lend-1):
+        if position > 0:
+            #long
+            if prepared_df['close'][i] < stop_prise:
+                #stop_loss
+                deal = deal - (open_price-prepared_df['close'][i])
+                position = 0
+                print('stop loss')
+            else:
+                print(i, position, proffit_array)
+                temp_arr = copy.copy(proffit_array)
+                for j in range(0, len(temp_arr) - 1):
+                    delta = temp_arr[j][0]
+                    contracts = temp_arr[j][1]
+                    if prepared_df['close'][i] > open_price + delta:
+                        position = position - contracts
+                        deal = deal + (prepared_df['close'][i] - open_price)*contracts
+                        del proffit_array[0]
 
+        elif position < 0:
+            #short
+            pass
+        else:
+            if prepared_df['lcc'][i-1] != None:
+                #Long
+                if prepared_df['position_in_channel'][i-1] < 0.5:
+                    if prepared_df['slope'][i-1] < -20:
+                        print(i, 'open long position')
+                        proffit_array = copy.copy(eth_proffit_array)
+                        position = 10
+                        open_price = prepared_df['close'][i]
+                        stop_prise = prepared_df['close'][i]*0.99
+            if prepared_df['hcc'][i - 1] != None:
+                # Short
+                if prepared_df['position_in_channel'][i-1] > 0.5:
+                    if prepared_df['slope'][i - 1] > -20:
+                        print(i, 'open short position')
+                        proffit_array = copy.copy(eth_proffit_array)
+                        position = -10
+                        open_price = prepared_df['close'][i]
+                        stop_prise = prepared_df['close'][i] * 1.01
 
 
 if __name__ == "__main__":
