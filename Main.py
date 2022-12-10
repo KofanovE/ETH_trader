@@ -18,7 +18,7 @@ from Indicators import *
 def main():
 
     pd.set_option('display.max_columns', None)  #форматування відображення DataFrame
-    # pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_rows', None)
     pd.set_option('display.max_colwidth', None)
 
     # api_key = "8T4KQAIG4PFXRYSG"
@@ -87,20 +87,27 @@ def main():
     position = 0
     eth_proffit_array = [[20, 1], [40, 1], [60, 2], [80, 2], [100, 2], [150, 1], [200, 1], [200, 0]]
 
+    prepared_df['deal_o'] = [None] * lend  #open
+    prepared_df['deal_c'] = [None] * lend  #close
+    prepared_df['earn'] = [None] * lend    #earn
+
+
     for i in range(4, lend-1):
-        if position > 0:
+        prepared_df.at[i, 'earn'] = deal
+        if position > 0:                               #if open position which contract > 0 = Long
             #long
-            if prepared_df['close'][i] < stop_prise:
+            if prepared_df['close'][i] < stop_prise:   # if actual price < stop price
                 #stop_loss
-                deal = deal - (open_price-prepared_df['close'][i])
-                position = 0
-                print('stop loss')
+                deal = deal - (open_price-prepared_df['close'][i]) # added loss to deal
+                position = 0                                       # clossed position
+                prepared_df.at[i, 'deal_c'] = prepared_df['close'][i] # write in deal_close actual price
             else:
                 temp_arr = copy.copy(proffit_array)
                 for j in range(0, len(temp_arr) - 1):
                     delta = temp_arr[j][0]
                     contracts = temp_arr[j][1]
                     if prepared_df['close'][i] > open_price + delta:
+                        prepared_df.at[i, 'deal_c'] = prepared_df['close'][i]
                         position = position - contracts
                         deal = deal + (prepared_df['close'][i] - open_price)*contracts
                         del proffit_array[0]
@@ -108,17 +115,17 @@ def main():
         elif position < 0:
             #short
             if prepared_df['close'][i] > stop_prise:
+                #stop loss
                 deal = deal - prepared_df['close'][i] - open_price
                 position = 0
-                print("stop loss")
+                prepared_df.at[i, 'deal_c'] = prepared_df['close'][i]
             else:
                 temp_arr = copy.copy(proffit_array)
                 for j in range(0, len(temp_arr)-1):
                     delta = temp_arr[j][0]
                     contracts = temp_arr[j][1]
                     if prepared_df['close'][i] < open_price - delta:
-                        print(i, position, open_price, prepared_df['close'][i])
-                        print(proffit_array)
+                        prepared_df.at[i, 'deal_c'] = prepared_df['close'][i]
                         position = position + contracts
                         deal = deal + (open_price - prepared_df['close'][i]) * contracts
                         del proffit_array[0]
@@ -127,7 +134,7 @@ def main():
                 #Long
                 if prepared_df['position_in_channel'][i-1] < 0.5:
                     if prepared_df['slope'][i-1] < -20:
-                        print(i, 'open long position')
+                        prepared_df.at[i, 'deal_o'] = prepared_df['close'][i]
                         proffit_array = copy.copy(eth_proffit_array)
                         position = 10
                         open_price = prepared_df['close'][i]
@@ -136,11 +143,13 @@ def main():
                 # Short
                 if prepared_df['position_in_channel'][i-1] > 0.5:
                     if prepared_df['slope'][i - 1] > -20:
-                        print(i, 'open short position')
+                        prepared_df.at[i, 'deal_o'] = prepared_df['close'][i]
                         proffit_array = copy.copy(eth_proffit_array)
                         position = -10
                         open_price = prepared_df['close'][i]
                         stop_prise = prepared_df['close'][i] * 1.01
+
+    print(prepared_df)
 
 
 if __name__ == "__main__":
