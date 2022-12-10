@@ -32,6 +32,7 @@ def main():
     df = df[::-1]                                       # [timestamp, open, high, low, close, volume]
     prepared_df = PrepareDF(df)
 
+
     # prepared_df[0:100][['slope']].plot()
     # prepared_df[0:100][['close']].plot()
     # prepared_df[0:100][['close', 'chanel_max', 'chanel_min']].plot()
@@ -47,7 +48,7 @@ def main():
             prepared_df.at[i, 'lcc'] = prepared_df['close'][i]
 
 
-    aa = prepared_df[0:200]
+    aa = prepared_df[0:1000]
     aa = aa.reset_index()
 
     labels = ['close', 'hcc', 'lcc', 'chanel_max', 'chanel_min']
@@ -78,7 +79,7 @@ def main():
     ax2.grid(True)
     ax3.grid(True)
 
-    plt.show()
+    # plt.show()
 
     # Тестова стратегія
     #________________________________________________________________________________________________
@@ -95,7 +96,6 @@ def main():
                 position = 0
                 print('stop loss')
             else:
-                print(i, position, proffit_array)
                 temp_arr = copy.copy(proffit_array)
                 for j in range(0, len(temp_arr) - 1):
                     delta = temp_arr[j][0]
@@ -107,7 +107,21 @@ def main():
 
         elif position < 0:
             #short
-            pass
+            if prepared_df['close'][i] > stop_prise:
+                deal = deal - prepared_df['close'][i] - open_price
+                position = 0
+                print("stop loss")
+            else:
+                temp_arr = copy.copy(proffit_array)
+                for j in range(0, len(temp_arr)-1):
+                    delta = temp_arr[j][0]
+                    contracts = temp_arr[j][1]
+                    if prepared_df['close'][i] < open_price - delta:
+                        print(i, position, open_price, prepared_df['close'][i])
+                        print(proffit_array)
+                        position = position + contracts
+                        deal = deal + (open_price - prepared_df['close'][i]) * contracts
+                        del proffit_array[0]
         else:
             if prepared_df['lcc'][i-1] != None:
                 #Long
