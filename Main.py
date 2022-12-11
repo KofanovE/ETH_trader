@@ -5,6 +5,9 @@ import pandas as pd
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from futures_sign import send_signed_request, send_public_request
+from binance import Client, ThredeWebsocketManager, ThredeDepthCacheManager
+from cred import KEY, SECRET
 
 
 from Indicators import *
