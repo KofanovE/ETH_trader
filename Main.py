@@ -14,10 +14,7 @@ from binance_functions import *
 from Indicators import *
 
 
-"""
-В PrepareDF функції планується добавити стовпці мін та макс каналу з середніх значеннь з історії, 
-позиція в каналі та кут нахилу тренду
-"""
+
 
 def main():
 
