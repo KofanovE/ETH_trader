@@ -20,6 +20,7 @@ from Indicators import *
 def main():
 
 
+
     global client
     symbol = 'ETHUSDT'
     client = Client(KEY, SECRET)
