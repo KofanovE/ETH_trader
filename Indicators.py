@@ -42,9 +42,9 @@ def indATR(source_DF, n):
     df['H-L'] = abs(df['high']-df['low'])
     df['H-PC'] = abs(df['high']-df['close'].shift(1))
     df['L-PC'] = abs(df['low']-df['close'].shift(1))
-    df['TR'] = df[['H-L','H-PC','L-PC']].max(axis=1,skipna=False)
+    df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1, skipna=False)
     df['ATR'] = df['TR'].rolling(n).mean()
-    df_temp = df.drop(['H-L','H-PC','L-PC'],axis=1)
+    df_temp = df.drop(['H-L', 'H-PC', 'L-PC'], axis=1)
     return df_temp
 
 
@@ -90,3 +90,31 @@ def getMaxMinChannel(DF, n):
         if minn > DF['low'][len(DF) - i]:
             minn = DF['low'][len(DF) - i]
     return maxx, minn
+
+
+def check_if_signal(symbol):
+    ohlc = get_futures_klines(symbol, 100) # get last 100 kandels
+    prepared_df = PrepareDF(ohlc)
+    signal = "" #return value
+
+    i = 98 # 99 is current kandel which is not clossed, 98 is last closed candel, we need 97 to check it is bottom or top
+
+    if isLCC(prepared_df, i - 1) > 0:
+        # found bottom -  OPEN LONG
+        if prepared_df['position_in_chanel'][i-1] < 0.5:
+            #close to top of channel
+            if prepared_df['slope'][i-1] < 20:
+                #found a good enter point for Long
+                signal = 'long'
+
+    if isHCC(prepared_df, i - 1) > 0:
+        #found top - OPEN SHORT
+        if prepared_df['position_in_channel'][i-1] > 0.5:
+            #close to top of channel
+            if prepared_df['slope'][i-1] > 20:
+                # found a good enter point for Short
+                signal = 'short'
+
+    return signal
+
+
