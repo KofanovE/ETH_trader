@@ -1,4 +1,5 @@
 import copy
+import time
 
 import numpy as np
 import pandas as pd
@@ -20,21 +21,32 @@ def main():
 
 
     global client
-
     symbol = 'ETHUSDT'
-
     client = Client(KEY, SECRET)
 
-    # open_position(symbol, 'short', 0.006)
+    maxposition = 0.006
+    stop_percent = 0.01 # 0.01 = 1%
+    eth_proffit_array = [[20, 1], [40, 1], [60, 2], [80, 2], [100, 2], [150, 1], [200, 1], [200, 0]]
+    proffit_array = copy.copy(eth_proffit_array)
 
-    # close_position(symbol, 'short', 0.006)
-
-    print(get_futures_klines(symbol))
-
-    # print(get_opened_positions(symbol))
-
+    pointer = str(rando.randint(1000, 9999))
 
 
+    starttime = time.time()
+    timeout = time.time() + 60 * 60 * 12
+    courent = 1
+
+    while time.time() <= timeout:
+        try:
+            prt("script continue running at "+time.strftime('%Y - %m - %d %H:%M:%S', time.localtime(time.time())))
+            main(counterr)
+            counterr += 1
+            if counterr > 5:
+                counterr = 1
+            time.sleep(60 - ((time.time() - starttime) % 60.0)) # 1 minute interval between each new execution
+        except KeyboardInterrupt:
+            print('\n\KeyboardInterrupt. Stopping.')
+            exit()
 
 
 
