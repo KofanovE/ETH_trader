@@ -1,2 +1,8 @@
 10/12/'22
 - cannot normaly test programm, becouse alfavantage closed free intraday statistic -> faster make realization with ussing binance
+22/12/'22
+- all right. program is running. Next speps:
+        a. trailing stop
+        b. universal arrays for take profit
+        c. look for coins with signals
+        d. log of trading

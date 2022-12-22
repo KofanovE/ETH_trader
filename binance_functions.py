@@ -14,6 +14,7 @@ import requests
 from Indicators import *
 
 
+
 global client
 client = Client(KEY, SECRET)
 
@@ -69,8 +70,9 @@ def open_position(symbol, s_l, quantity_l): #fincion opening position
 def close_position(symbol, s_l, quantity_l): #function closing position
     sprice = get_symbol_price(symbol)
 
+    print("srop loss1:", symbol, s_l, quantity_l)
     if s_l == 'long':
-        close_price = str(round(sprice * (1 - 0.005), 3))
+        close_price = str(round(sprice * (1 - 0.01), 2))
         params = {
             'batchOrders': [
                  {
@@ -86,7 +88,7 @@ def close_position(symbol, s_l, quantity_l): #function closing position
         responce = send_signed_request('POST', '/fapi/v1/batchOrders', params)
 
     if s_l == 'short':
-        close_price = str(round(sprice * (1 + 0.005), 3))
+        close_price = str(round(sprice * (1 + 0.01), 2))
         params = {
             'batchOrders': [
                  {
