@@ -6,7 +6,7 @@ import matplotlib as mpl
 import copy
 from sklearn.linear_model import LinearRegression
 
-
+import binance_functions as bf
 """
 В PrepareDF функції планується добавити стовпці мін та макс каналу з середніх значеннь з історії,
 позиція в каналі та кут нахилу тренду
@@ -15,7 +15,7 @@ from sklearn.linear_model import LinearRegression
 
 def PrepareDF(DF):                                                     # Функція формування повного датафрейму
     ohlc = DF
-    ohlc.columns = ["date", "open", "high", "low", "close", "volume"]  # Зміна назв колонок датафрейму
+    ohlc.columns = ["date", "open", "high", "low", "close", "volume", "date_2"]  # Зміна назв колонок датафрейму
     ohlc = ohlc.set_index('date')
     df = indATR(ohlc, 14).reset_index()
     df['slope'] = indSlope(df['close'], 5)
@@ -93,7 +93,7 @@ def getMaxMinChannel(DF, n):
 
 
 def check_if_signal(symbol):
-    ohlc = get_futures_klines(symbol, 100) # get last 100 kandels
+    ohlc = bf.get_futures_klines(symbol, 100) # get last 100 kandels
     prepared_df = PrepareDF(ohlc)
     signal = "" #return value
 
@@ -101,7 +101,7 @@ def check_if_signal(symbol):
 
     if isLCC(prepared_df, i - 1) > 0:
         # found bottom -  OPEN LONG
-        if prepared_df['position_in_chanel'][i-1] < 0.5:
+        if prepared_df['position_in_chanel'][i-1] < 0.3:
             #close to top of channel
             if prepared_df['slope'][i-1] < 20:
                 #found a good enter point for Long
@@ -109,7 +109,7 @@ def check_if_signal(symbol):
 
     if isHCC(prepared_df, i - 1) > 0:
         #found top - OPEN SHORT
-        if prepared_df['position_in_channel'][i-1] > 0.5:
+        if prepared_df['position_in_channel'][i-1] > 0.7:
             #close to top of channel
             if prepared_df['slope'][i-1] > 20:
                 # found a good enter point for Short

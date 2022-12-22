@@ -13,8 +13,12 @@ import requests
 
 from Indicators import *
 
+
+global client
+client = Client(KEY, SECRET)
+
 def get_futures_klines(symbol, limit=500):   #example symple request to binance and get last price
-    x = requests.get(f'https://binance.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
+    x = requests.get(f'https://fapi.binance.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
     df = pd.DataFrame(x.json())
     df.columns = ['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'd1', 'd2', 'd3', 'd4', 'd5']
     df = df.drop(['d1', 'd2', 'd3', 'd4', 'd5'], axis=1)
@@ -66,7 +70,7 @@ def close_position(symbol, s_l, quantity_l): #function closing position
     sprice = get_symbol_price(symbol)
 
     if s_l == 'long':
-        close_price = str(round(sprice * (1 - 0.01), 2))
+        close_price = str(round(sprice * (1 - 0.005), 3))
         params = {
             'batchOrders': [
                  {
@@ -82,7 +86,7 @@ def close_position(symbol, s_l, quantity_l): #function closing position
         responce = send_signed_request('POST', '/fapi/v1/batchOrders', params)
 
     if s_l == 'short':
-        close_price = str(round(sprice * (1 + 0.01), 2))
+        close_price = str(round(sprice * (1 + 0.005), 3))
         params = {
             'batchOrders': [
                  {
