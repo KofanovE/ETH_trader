@@ -30,66 +30,66 @@ pointer = str(random.randint(1000, 9999))
 def main(step):
     global proffit_array
 
-    # try:
-    position = get_opened_positions(symbol)                       # Open new position
-    open_sl = position[0]
-    if open_sl == "":         # no position
-        prt('No open position')
-        # close all stop loss orders
-        check_and_close_orders(symbol)                 # close all opened positions
-        signal = check_if_signal(symbol)               # check Long or Short signal
-        proffit_array = copy.copy(eth_proffit_array)
+    try:
+        position = get_opened_positions(symbol)                       # Open new position
+        open_sl = position[0]
+        if open_sl == "":         # no position
+            prt('No open position')
+            # close all stop loss orders
+            check_and_close_orders(symbol)                 # close all opened positions
+            signal = check_if_signal(symbol)               # check Long or Short signal
+            proffit_array = copy.copy(eth_proffit_array)
 
-        if signal == "long":
-            open_position(symbol, 'long', maxposition)
+            if signal == "long":
+                open_position(symbol, 'long', maxposition)
 
-        elif signal == 'short':
-            open_position(symbol, 'short', maxposition)
-
-
-    else:                                             # If position is opened
-
-        entry_price = position[5]                       # check enter price
-        current_price = get_symbol_price(symbol)        # check current price
-        quantity = position[1]                          # get information about current number of opened positions
-        prt('Founded open position ' + open_sl)
-        print('Quantity ', str(quantity))
-
-        if open_sl == "long":
-            stop_price = entry_price * (1 - stop_percent)     # Found stop_price
-            if current_price < stop_price:
-                #stop Loss
-                close_position(symbol, 'long', abs(quantity))
-                proffit_array = copy.copy(eth_proffit_array)
-            else:
-                temp_arr = copy.copy(proffit_array)
-                for j in range(0, len(temp_arr) - 1):
-                    delta = temp_arr[j][0]
-                    contracts = temp_arr[j][1]
-                    if current_price > entry_price + delta:
-                        #take profit
-                        close_position(symbol, 'long', abs(round(maxposition * (contracts / 10), 3)))
-                        del proffit_array[0]
+            elif signal == 'short':
+                open_position(symbol, 'short', maxposition)
 
 
-        if open_sl == "short":
-            stop_price = entry_price * (1 + stop_percent)
-            if current_price > stop_price:
-                # stop Loss
-                close_position(symbol, 'long', abs(quantity))
-                proffit_array = copy.copy(eth_proffit_array)
-            else:
-                temp_arr = copy.copy(proffit_array)
-                for j in range(0, len(temp_arr) - 1):
-                    delta = temp_arr[j][0]
-                    contracts = temp_arr[j][1]
-                    if current_price > entry_price - delta:
-                        # take profit
-                        close_position(symbol, 'long', abs(round(maxposition * (contracts / 10), 3)))
-                        del proffit_array[0]
+        else:                                             # If position is opened
 
-    # except:
-    #     prt('\n\nSomething went wrong. Continuig...')
+            entry_price = position[5]                       # check enter price
+            current_price = get_symbol_price(symbol)        # check current price
+            quantity = position[1]                          # get information about current number of opened positions
+            prt('Founded open position ' + open_sl)
+            print('Quantity ', str(quantity))
+
+            if open_sl == "long":
+                stop_price = entry_price * (1 - stop_percent)     # Found stop_price
+                if current_price < stop_price:
+                    #stop Loss
+                    close_position(symbol, 'long', abs(quantity))
+                    proffit_array = copy.copy(eth_proffit_array)
+                else:
+                    temp_arr = copy.copy(proffit_array)
+                    for j in range(0, len(temp_arr) - 1):
+                        delta = temp_arr[j][0]
+                        contracts = temp_arr[j][1]
+                        if current_price > entry_price + delta:
+                            #take profit
+                            close_position(symbol, 'long', abs(round(maxposition * (contracts / 10), 3)))
+                            del proffit_array[0]
+
+
+            if open_sl == "short":
+                stop_price = entry_price * (1 + stop_percent)
+                if current_price > stop_price:
+                    # stop Loss
+                    close_position(symbol, 'long', abs(quantity))
+                    proffit_array = copy.copy(eth_proffit_array)
+                else:
+                    temp_arr = copy.copy(proffit_array)
+                    for j in range(0, len(temp_arr) - 1):
+                        delta = temp_arr[j][0]
+                        contracts = temp_arr[j][1]
+                        if current_price > entry_price - delta:
+                            # take profit
+                            close_position(symbol, 'long', abs(round(maxposition * (contracts / 10), 3)))
+                            del proffit_array[0]
+
+    except:
+        prt('\n\nSomething went wrong. Continuig...')
 
 def prt(message):
     # telegram message
@@ -106,7 +106,7 @@ while time.time() <= timeout:
         counterr += 1
         if counterr > 5:
             counterr = 1
-        time.sleep(10 - ((time.time() - starttime) % 10.0)) # 1 minute interval between each new execution
+        time.sleep(60 - ((time.time() - starttime) % 60.0)) # 1 minute interval between each new execution
     except KeyboardInterrupt:
         print('\n\KeyboardInterrupt. Stopping.')
         exit()
