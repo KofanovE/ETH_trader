@@ -33,6 +33,7 @@ def main(step):
         position = get_opened_positions(symbol)                       # Open new position
         open_sl = position[0]
         if open_sl == "":         # no position
+            prt('No open position')
             # close all stop loss orders
             check_and_close_orders(symbol)                 # close all opened positions
             signal = check_if_signal(symbol)               # check Long or Short signal
@@ -46,9 +47,12 @@ def main(step):
 
 
         else:                                             # If position is opened
+
             entry_price = position[5]                       # check enter price
             current_price = get_symbol_price(symbol)        # check current price
             quantity = position[1]                          # get information about current number of opened positions
+            prt('Founded open position ' + open_sl)
+            print('Quantity ', str(quantity))
 
             if open_sl == "long":
                 stop_price = entry_price * (1 - stop_percent)     # Found stop_price
