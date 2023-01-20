@@ -101,19 +101,19 @@ def check_if_signal(symbol):
 
     if isLCC(prepared_df, i - 1) > 0:
         # found bottom -  OPEN LONG
-        if prepared_df['position_in_chanel'][i-1] < 0.3:
+        if prepared_df['position_in_chanel'][i-1] < 0.1:
             #close to top of channel
-            if prepared_df['slope'][i-1] < 20:
-                #found a good enter point for Long
-                signal = 'long'
+            # if prepared_df['slope'][i-1] > 20:
+            #found a good enter point for Long
+            signal = 'long'
 
     if isHCC(prepared_df, i - 1) > 0:
         #found top - OPEN SHORT
-        if prepared_df['position_in_channel'][i-1] > 0.7:
+        if prepared_df['position_in_channel'][i-1] > 0.9:
             #close to top of channel
-            if prepared_df['slope'][i-1] > 20:
-                # found a good enter point for Short
-                signal = 'short'
+            # if prepared_df['slope'][i-1] > 20:
+            # found a good enter point for Short
+            signal = 'short'
 
     return signal
 

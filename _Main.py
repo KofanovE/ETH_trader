@@ -20,8 +20,8 @@ symbol = 'ETHUSDT'
 client = Client(KEY, SECRET)
 
 maxposition = 0.006
-stop_percent = 0.001  # 0.01 = 1%
-eth_proffit_array = [[6, 1], [9, 1], [12, 2], [18, 2], [24, 2], [30, 1], [40, 1], [40, 0]]
+stop_percent = 0.01  # 0.01 = 1%
+eth_proffit_array = [[20, 1], [40, 1], [60, 2], [80, 2], [100, 2], [150, 1], [200, 1], [200, 0]]
 proffit_array = copy.copy(eth_proffit_array)
 
 pointer = str(random.randint(1000, 9999))
