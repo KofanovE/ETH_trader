@@ -1,5 +1,6 @@
 import copy
 
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -11,15 +12,27 @@ from cred import KEY, SECRET
 import requests
 
 
+
+
+
+
+
+
+
+
+
+
 from Indicators import *
 
 
 
 global client
-client = Client(KEY, SECRET)
+client = Client(KEY, SECRET, testnet=True)
 
 def get_futures_klines(symbol, limit=500):   #example symple request to binance and get last price
-    x = requests.get(f'https://binance.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
+    # x = requests.get(f'https://binance.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
+
+    x = requests.get(f'https://testnet.binancefuture.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
     df = pd.DataFrame(x.json())
     df.columns = ['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'd1', 'd2', 'd3', 'd4', 'd5']
     df = df.drop(['d1', 'd2', 'd3', 'd4', 'd5'], axis=1)
@@ -28,9 +41,11 @@ def get_futures_klines(symbol, limit=500):   #example symple request to binance 
     df['low'] = df['low'].astype(float)
     df['close'] = df['close'].astype(float)
     df['volume'] = df['volume'].astype(float)
+    print(df.loc[0, 'close'])
     return df
 
 def open_position(symbol, s_l, quantity_l): #fincion opening position
+
     sprice = get_symbol_price(symbol)
 
     if s_l == 'long':
@@ -68,6 +83,7 @@ def open_position(symbol, s_l, quantity_l): #fincion opening position
 
 
 def close_position(symbol, s_l, quantity_l): #function closing position
+
     sprice = get_symbol_price(symbol)
 
     print("srop loss1:", symbol, s_l, quantity_l)
@@ -105,6 +121,7 @@ def close_position(symbol, s_l, quantity_l): #function closing position
 
 
 def get_opened_positions(symbol): # function gettion information about opened prices
+
     status = client.futures_account()
     positions = pd.DataFrame(status['positions'])
     a = positions[positions['symbol'] == symbol]['positionAmt'].astype(float).tolist()[0]
@@ -121,6 +138,7 @@ def get_opened_positions(symbol): # function gettion information about opened pr
     return [pos, a, profit, leverage, balance, round(float(entryprice), 3), 0]
 
 def check_and_close_orders(symbol):
+
     global isStop
     a = client.futures_get_open_orders(symbol=symbol)
     if len(a) > 0:
@@ -129,6 +147,7 @@ def check_and_close_orders(symbol):
 
 
 def get_symbol_price(symbol):
+
     prices = client.get_all_tickers()
     df = pd.DataFrame(prices)
     return float(df[df['symbol'] == symbol]['price'])

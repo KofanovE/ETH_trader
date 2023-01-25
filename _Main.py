@@ -1,26 +1,44 @@
 import copy
 import time
 import random
+import logging
 
 
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-import matplotlib.pyplot as plt
-import matplotlib as mpl
+# import matplotlib.pyplot as plt
 from futures_sign import send_signed_request, send_public_request
 from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
-from cred import KEY, SECRET
+from cred import KEY, SECRET, bot_token, chat_id
 import requests
 
 from binance_functions import *
 from Indicators import *
+from telegram_bot import *
 
 global client
-symbol = 'ETHUSDT'
-client = Client(KEY, SECRET)
 
-maxposition = 0.006
+logger = logging.getLogger("_Main")
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler("main_log.log")
+formatter = logging.Formatter(("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+
+logger.debug(f"\n\n\n")
+logger.warning(f"Start program: {time.strftime('%d.%m.%Y  %H:%M:%S', time.localtime(time.time()))}")
+
+
+
+
+
+
+symbol = 'ETHUSDT'
+client = Client(KEY, SECRET, testnet=True)
+
+maxposition = 0.1
 stop_percent = 0.01  # 0.01 = 1%
 eth_proffit_array = [[20, 1], [40, 1], [60, 2], [80, 2], [100, 2], [150, 1], [200, 1], [200, 0]]
 proffit_array = copy.copy(eth_proffit_array)
@@ -32,17 +50,22 @@ def main(step):
     global proffit_array
 
     try:
+        getTPSLfrom_telegram()
         position = get_opened_positions(symbol)                       # Open new position
         open_sl = position[0]
+        logger.debug(f"Current position: {open_sl}")
+
         if open_sl == "":         # no position
             prt('No open position')
             # close all stop loss orders
             check_and_close_orders(symbol)                 # close all opened positions
             signal = check_if_signal(symbol)               # check Long or Short signal
             proffit_array = copy.copy(eth_proffit_array)
+            logger.debug(f"No open position: {symbol} Signal : {signal}")
 
             if signal == "long":
                 open_position(symbol, 'long', maxposition)
+
 
             elif signal == 'short':
                 open_position(symbol, 'short', maxposition)
@@ -53,14 +76,16 @@ def main(step):
             entry_price = position[5]                       # check enter price
             current_price = get_symbol_price(symbol)        # check current price
             quantity = position[1]                          # get information about current number of opened positions
+            logger.info(f"Founded open position: {symbol} : {quantity}({open_sl})")
             prt('Founded open position ' + open_sl)
-            print('Quantity ', str(quantity))
+            prt('Quantity ', str(quantity))
 
 
             if open_sl == "long":
                 stop_price = entry_price * (1 - stop_percent)     # Found stop_price
                 if current_price < stop_price:
                     #stop Loss
+                    logger.info(f"Long -> Stop Loss: {current_price} < {stop_price}")
                     close_position(symbol, 'long', abs(quantity))
                     proffit_array = copy.copy(eth_proffit_array)
                 else:
@@ -72,6 +97,7 @@ def main(step):
                         contracts = temp_arr[j][1]
                         if current_price > entry_price + delta:
                             #take profit
+                            logger.info(f"Long -> Take Profit ({abs(round(maxposition * (contracts / 10), 3))}): {current_price} > {entry_price + delta}")
                             close_position(symbol, 'long', abs(round(maxposition * (contracts / 10), 3)))
                             del proffit_array[0]
 
@@ -81,6 +107,7 @@ def main(step):
 
                 if current_price > stop_price:
                     # stop Loss
+                    logger.info(f"Short -> Stop Loss: {current_price} > {stop_price}")
                     close_position(symbol, 'short', abs(quantity))
                     proffit_array = copy.copy(eth_proffit_array)
                 else:
@@ -90,14 +117,17 @@ def main(step):
                         contracts = temp_arr[j][1]
                         if current_price > entry_price - delta:
                             # take profit
+                            logger.info(f"Short -> Take Profit ({abs(round(maxposition * (contracts / 10), 3))}): {current_price} > {entry_price - delta}")
                             close_position(symbol, 'short', abs(round(maxposition * (contracts / 10), 3)))
                             del proffit_array[0]
 
     except:
+        logger.error("Information about error: ", exc_info=True)
         prt('\n\nSomething went wrong. Continuig...')
 
 def prt(message):
     # telegram message
+    telegram_bot_sendtext(pointer+': '+message)
     print(pointer + ':   ' + message)
 
 starttime = time.time()
@@ -107,6 +137,8 @@ trailing_price = 0
 
 while time.time() <= timeout:
     try:
+        logger.info(f"______________________________________________________________________________________________________________")
+        logger.info(f"Script continue running at {time.strftime('%d.%m.%Y  %H:%M:%S', time.localtime(time.time()))}")
         prt("script continue running at "+time.strftime('%Y - %m - %d %H:%M:%S', time.localtime(time.time())))
         main(counterr)
         counterr += 1
@@ -114,6 +146,7 @@ while time.time() <= timeout:
             counterr = 1
         time.sleep(20 - ((time.time() - starttime) % 20.0)) # 1 minute interval between each new execution
     except KeyboardInterrupt:
+        logger.warning(f"KeyboardInterrupt. Stopping: {time.strftime('%d.%m.%Y  %H:%M:%S', time.localtime(time.time()))}")
         print('\n\KeyboardInterrupt. Stopping.')
         exit()
 

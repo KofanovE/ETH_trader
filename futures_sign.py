@@ -19,7 +19,7 @@ python futures.py
 """
 
 # BASE_URL = 'https://fapi.binance.com' # production base url
-BASE_URL = 'https://fapi.binance.com' # testnet base url
+BASE_URL = 'https://testnet.binancefuture.com' # testnet base url
 
 ''' ======  begin of functions, you don't need to touch ====== '''
 def hashing(query_string):
