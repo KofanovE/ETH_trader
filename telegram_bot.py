@@ -5,7 +5,7 @@ from cred import bot_token, chat_id
 
 
 
-telegram_delay = 8
+telegram_delay = 13
 
 def getTPSLfrom_telegram():
     strr = f"https://api.telegram.org/bot{bot_token}/getUpdates"
@@ -16,13 +16,17 @@ def getTPSLfrom_telegram():
     textt = rs3['text']
     datet = rs3['date']
 
+    print(textt, "\n")
+    print(time.time(), datet, time.time()-datet, telegram_delay)
+
     if (time.time() - datet) < telegram_delay:
+        print("pic")
         if 'quit' in textt:
             quit()
         if 'exit' in textt:
             exit()
         if 'hello' in textt:
-            telegram_bot sendtext('Hello, how are you?')
+            telegram_bot_sendtext('Hello, how are you?')
         if 'close_pos' in textt:
             position = get_opened_positions(symbol)
             open_sl = position[0]
@@ -31,21 +35,22 @@ def getTPSLfrom_telegram():
 
 
 
-    def telegram_bot_sendtext(bot_message):
-        bot_token2 = bot_token
-        bot_chatID = chat_id
-        send_text = f"https://api.telegram.org/bot{bot_token2}/sendMessage?chat_id={bot_chatID}&parse_mode=Markdown&text={bot_message}"
-        return response.json()
+def telegram_bot_sendtext(bot_message):
+    bot_token2 = bot_token
+    bot_chatID = chat_id
+    send_text = f"https://api.telegram.org/bot{bot_token2}/sendMessage?chat_id={bot_chatID}&parse_mode=Markdown&text={bot_message}"
+    response = requests.get(send_text)
+    return response.json()
 
 
     starttime = time.time()
     timeout = time.time() + 60*60*12
     counterr = 1
 
-    while time.time() <= timeout
+    while time.time() <= timeout:
         try:
             print("passthroug at "+time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-            gerTPSLfrom_telegram()
+            getTPSLfrom_telegram()
             time.sleep(15 - ((time.time() - starttime) % 15.0))
         except KeyboardInterrupt:
             print('\n\nKeyboard exception received. Exiting')

@@ -78,7 +78,7 @@ def main(step):
             quantity = position[1]                          # get information about current number of opened positions
             logger.info(f"Founded open position: {symbol} : {quantity}({open_sl})")
             prt('Founded open position ' + open_sl)
-            prt('Quantity ', str(quantity))
+            prt('Quantity ' + str(quantity))
 
 
             if open_sl == "long":
@@ -115,7 +115,7 @@ def main(step):
                     for j in range(0, len(temp_arr) - 1):
                         delta = temp_arr[j][0]
                         contracts = temp_arr[j][1]
-                        if current_price > entry_price - delta:
+                        if current_price < entry_price - delta:
                             # take profit
                             logger.info(f"Short -> Take Profit ({abs(round(maxposition * (contracts / 10), 3))}): {current_price} > {entry_price - delta}")
                             close_position(symbol, 'short', abs(round(maxposition * (contracts / 10), 3)))
