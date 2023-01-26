@@ -17,7 +17,7 @@ from binance_functions import *
 from Indicators import *
 from telegram_bot import *
 
-global client
+global client, symbol, maxposition
 
 logger = logging.getLogger("_Main")
 logger.setLevel(logging.DEBUG)
@@ -50,7 +50,7 @@ def main(step):
     global proffit_array
 
     try:
-        getTPSLfrom_telegram()
+        getTPSLfrom_telegram(symbol, maxposition)
         position = get_opened_positions(symbol)                       # Open new position
         open_sl = position[0]
         logger.debug(f"Current position: {open_sl}")
@@ -127,7 +127,7 @@ def main(step):
 
 def prt(message):
     # telegram message
-    telegram_bot_sendtext(pointer+': '+message)
+    telegram_bot_sendtext(pointer+': '+message, symbol, maxposition)
     print(pointer + ':   ' + message)
 
 starttime = time.time()
