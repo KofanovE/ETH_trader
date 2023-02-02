@@ -56,7 +56,8 @@ def main(step):
         logger.debug(f"Current position: {open_sl}")
 
         if open_sl == "":         # no position
-            prt('No open position')
+            if step == 5:
+                prt('No open position')
             # close all stop loss orders
             check_and_close_orders(symbol)                 # close all opened positions
             signal = check_if_signal(symbol)               # check Long or Short signal
@@ -77,8 +78,9 @@ def main(step):
             current_price = get_symbol_price(symbol)        # check current price
             quantity = position[1]                          # get information about current number of opened positions
             logger.info(f"Founded open position: {symbol} : {quantity}({open_sl})")
-            prt('Founded open position ' + open_sl)
-            prt('Quantity ' + str(quantity))
+            if step == 5:
+                prt('Founded open position ' + open_sl)
+                prt('Quantity ' + str(quantity))
 
 
             if open_sl == "long":
@@ -139,12 +141,13 @@ while time.time() <= timeout:
     try:
         logger.info(f"______________________________________________________________________________________________________________")
         logger.info(f"Script continue running at {time.strftime('%d.%m.%Y  %H:%M:%S', time.localtime(time.time()))}")
-        prt("script continue running at "+time.strftime('%Y - %m - %d %H:%M:%S', time.localtime(time.time())))
+        if counterr == 5:
+            prt("5th script continue running at "+time.strftime('%Y - %m - %d %H:%M:%S', time.localtime(time.time())))
         main(counterr)
         counterr += 1
         if counterr > 5:
             counterr = 1
-        time.sleep(20 - ((time.time() - starttime) % 20.0)) # 1 minute interval between each new execution
+        time.sleep(5 - ((time.time() - starttime) % 5.0)) # 1 minute interval between each new execution
     except KeyboardInterrupt:
         logger.warning(f"KeyboardInterrupt. Stopping: {time.strftime('%d.%m.%Y  %H:%M:%S', time.localtime(time.time()))}")
         print('\n\KeyboardInterrupt. Stopping.')

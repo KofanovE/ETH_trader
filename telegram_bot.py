@@ -18,8 +18,8 @@ def getTPSLfrom_telegram(symbol, maxposition):
     textt = rs3['text']
     datet = rs3['date']
 
-    print(textt, "\n")
-    print(time.time(), datet, time.time()-datet, telegram_delay)
+    # print(textt, "\n")
+    # print(time.time(), datet, time.time()-datet, telegram_delay)
 
     if (time.time() - datet) < telegram_delay:
         print("pic")
