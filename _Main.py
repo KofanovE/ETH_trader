@@ -50,7 +50,7 @@ def main(step):
     global proffit_array
 
     try:
-        getTPSLfrom_telegram(symbol, maxposition, starttime)
+        getTPSLfrom_telegram(symbol, maxposition)
         position = get_opened_positions(symbol)                       # Open new position
         open_sl = position[0]
         logger.debug(f"Current position: {open_sl}")
@@ -127,7 +127,7 @@ def main(step):
 
 def prt(message):
     # telegram message
-    telegram_bot_sendtext(pointer+': '+message, symbol, maxposition, starttime)
+    telegram_bot_sendtext(pointer+': '+message, symbol, maxposition)
     print(pointer + ':   ' + message)
 
 starttime = time.time()
