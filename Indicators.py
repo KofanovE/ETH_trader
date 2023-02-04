@@ -1,8 +1,12 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-import binance_functions as bf
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import copy
+from sklearn.linear_model import LinearRegression
 
+import binance_functions as bf
 
 
 def PrepareDF(DF):

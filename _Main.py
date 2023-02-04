@@ -1,6 +1,14 @@
+import copy
+import time
 import random
 import logging
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import requests
 
+from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
+from futures_sign import send_signed_request, send_public_request
 from binance_functions import *
 from Indicators import *
 from telegram_bot import *
@@ -48,6 +56,7 @@ def main(step):
         if open_sl == "":
             if step == 5:
                 prt('No open position')
+
             check_and_close_orders(symbol)                                  # close all opened positions to binance
             signal = check_if_signal(symbol)                                # check Long or Short signal
             proffit_array = copy.copy(eth_proffit_array)                    # getting new array of take profit steps
@@ -73,7 +82,13 @@ def main(step):
 
             # Subcycle: If current deal is Long
             if open_sl == "long":
-                stop_price = entry_price * (1 - stop_percent)               # getting current stop_price
+                # The mechanism of trailing stop
+                if len(proffit_array) < 8:
+                    trailing_price = entry_price + eth_proffit_array[-(len(proffit_array) + 1)][0]
+                else:
+                    trailing_price = entry_price
+
+                stop_price = trailing_price * (1 - stop_percent)            # getting current stop_price
                 # Subcycle: Stop Loss for Long deal
                 if current_price < stop_price:
                     logger.info(f"Long -> Stop Loss: {current_price} < {stop_price}")
@@ -94,7 +109,13 @@ def main(step):
 
             # Subcycle: If current deal is Short
             if open_sl == "short":
-                stop_price = entry_price * (1 + stop_percent)               # getting current stop_price
+                # The mechanism of trailing stop
+                if len(proffit_array) < 8:
+                    trailing_price = entry_price - eth_proffit_array[-(len(proffit_array) + 1)][0]
+                else:
+                    trailing_price = entry_price
+
+                stop_price = trailing_price * (1 + stop_percent)            # getting current stop_price
                 # Subcycle: Stop Loss for Short deal
                 if current_price > stop_price:
                     logger.info(f"Short -> Stop Loss: {current_price} > {stop_price}")
