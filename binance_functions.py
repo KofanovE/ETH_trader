@@ -1,6 +1,4 @@
 import copy
-
-
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -11,28 +9,22 @@ from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 from cred import KEY, SECRET
 import requests
 
-
-
-
-
-
-
-
-
-
-
-
-from Indicators import *
-
-
-
 global client
 client = Client(KEY, SECRET, testnet=True)
 
-def get_futures_klines(symbol, limit=500):   #example symple request to binance and get last price
-    # x = requests.get(f'https://binance.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
 
+
+def get_futures_klines(symbol, limit=500):
+    """
+    The functon sends equest to binance and get last price
+
+    :param symbol: name of coin (str)
+    :param limit: limit of time to get response (int)
+    :return: data frame (pandas)
+    """
+    # x = requests.get(f'https://binance.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
     x = requests.get(f'https://testnet.binancefuture.com/fapi/v1/klines?symbol={symbol}&limit={str(limit)}&interval=5m')
+
     df = pd.DataFrame(x.json())
     df.columns = ['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'd1', 'd2', 'd3', 'd4', 'd5']
     df = df.drop(['d1', 'd2', 'd3', 'd4', 'd5'], axis=1)
@@ -41,11 +33,19 @@ def get_futures_klines(symbol, limit=500):   #example symple request to binance 
     df['low'] = df['low'].astype(float)
     df['close'] = df['close'].astype(float)
     df['volume'] = df['volume'].astype(float)
-    print(df.loc[0, 'close'])
     return df
 
-def open_position(symbol, s_l, quantity_l): #fincion opening position
 
+
+def open_position(symbol, s_l, quantity_l):
+    """
+    The function sends a request to binance for opening position
+
+    :param symbol: name of coin (str)
+    :param s_l: type of opening position - long/short (str)
+    :param quantity_l: quantity opening position (float)
+    :return: None
+    """
     sprice = get_symbol_price(symbol)
 
     if s_l == 'long':
@@ -63,7 +63,7 @@ def open_position(symbol, s_l, quantity_l): #fincion opening position
             ]
 
         }
-        responce = send_signed_request('POST', '/fapi/v1/batchOrders', params)
+        send_signed_request('POST', '/fapi/v1/batchOrders', params)
     if s_l == 'short':
         close_price = str(round(sprice * (1 - 0.01), 2))
         params = {
@@ -79,14 +79,22 @@ def open_position(symbol, s_l, quantity_l): #fincion opening position
             ]
 
         }
-        responce = send_signed_request('POST', '/fapi/v1/batchOrders', params)
+        send_signed_request('POST', '/fapi/v1/batchOrders', params)
 
 
-def close_position(symbol, s_l, quantity_l): #function closing position
 
+def close_position(symbol, s_l, quantity_l):
+    """
+    The function sends a request to binance for closing position
+
+    :param symbol: name of coin (str)
+    :param s_l: type of closing position - long/short (str)
+    :param quantity_l: quantity closing position (float)
+    :return: None
+    """
     sprice = get_symbol_price(symbol)
 
-    print("srop loss1:", symbol, s_l, quantity_l)
+    print("stop loss1:", symbol, s_l, quantity_l)
     if s_l == 'long':
         close_price = str(round(sprice * (1 - 0.01), 2))
         params = {
@@ -101,7 +109,7 @@ def close_position(symbol, s_l, quantity_l): #function closing position
                 }
                             ]
                 }
-        responce = send_signed_request('POST', '/fapi/v1/batchOrders', params)
+        send_signed_request('POST', '/fapi/v1/batchOrders', params)
 
     if s_l == 'short':
         close_price = str(round(sprice * (1 + 0.01), 2))
@@ -117,7 +125,8 @@ def close_position(symbol, s_l, quantity_l): #function closing position
                 }
                             ]
                 }
-        responce = send_signed_request('POST', '/fapi/v1/batchOrders', params)
+        send_signed_request('POST', '/fapi/v1/batchOrders', params)
+
 
 
 def get_opened_positions(symbol): # function gettion information about opened prices
@@ -136,6 +145,7 @@ def get_opened_positions(symbol): # function gettion information about opened pr
     else:
         pos = ""
     return [pos, a, profit, leverage, balance, round(float(entryprice), 3), 0]
+
 
 def check_and_close_orders(symbol):
 

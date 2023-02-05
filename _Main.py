@@ -47,15 +47,35 @@ def main(step):
 
     try:
         # Getting initialization information
-        getTPSLfrom_telegram(symbol, maxposition)                           # getting command from telegram_bot
         position = get_opened_positions(symbol)                             # getting correct information from binance
         open_sl = position[0]                                               # correct signal
         logger.debug(f"Current position: {open_sl}")
 
+        # Getting command from telegram_bot
+        msg = getTPSLfrom_telegram()
+        if msg == 'quit':
+            quit()
+        elif msg == 'exit':
+            exit()
+        elif msg == 'hello':
+            telegram_bot_sendtext('Hello, how are you?')
+        elif msg == 'open_short':
+            telegram_bot_sendtext('Ok, open short.')
+            open_position(symbol, 'short', maxposition)
+        elif msg == 'open_long':
+            telegram_bot_sendtext('Ok, open long.')
+            open_position(symbol, 'long', maxposition)
+        elif msg == 'close_pos':
+            telegram_bot_sendtext('Ok, close position.')
+            position = get_opened_positions(symbol)
+            open_sl = position[0]
+            quantity = position[1]
+            close_position(symbol, open_sl, abs(quantity))
+
         # No current deal subcycle
         if open_sl == "":
             if step == 5:
-                prt('No open position')
+                prt(f'No open position.')
 
             check_and_close_orders(symbol)                                  # close all opened positions to binance
             signal = check_if_signal(symbol)                                # check Long or Short signal
@@ -76,9 +96,7 @@ def main(step):
             quantity = position[1]                                          # get information about current number of opened positions
 
             logger.info(f"Founded open position: {symbol} : {quantity}({open_sl})")
-            if step == 5:
-                prt('Founded open position ' + open_sl)
-                prt('Quantity ' + str(quantity))
+
 
             # Subcycle: If current deal is Long
             if open_sl == "long":
@@ -101,8 +119,9 @@ def main(step):
                     for j in range(0, len(temp_arr) - 1):
                         delta = temp_arr[j][0]
                         contracts = temp_arr[j][1]
+                        tp_price = entry_price + delta
                         # Subcycle: Take Profit for Long deal
-                        if current_price > entry_price + delta:
+                        if current_price > tp_price:
                             logger.info(f"Long -> Take Profit ({abs(round(maxposition * (contracts / 10), 3))}): {current_price} > {entry_price + delta}")
                             close_position(symbol, 'long', abs(round(maxposition * (contracts / 10), 3)))   # closing one current profit postition
                             del proffit_array[0]                                                            # deleting closed profit position from profit array
@@ -128,12 +147,16 @@ def main(step):
                     for j in range(0, len(temp_arr) - 1):
                         delta = temp_arr[j][0]
                         contracts = temp_arr[j][1]
+                        tp_price = entry_price - delta
                         # Subcycle: Take Profit for Short deal
-                        if current_price < entry_price - delta:
+                        if current_price < tp_price:
                             logger.info(f"Short -> Take Profit ({abs(round(maxposition * (contracts / 10), 3))}): {current_price} > {entry_price - delta}")
                             close_position(symbol, 'short', abs(round(maxposition * (contracts / 10), 3)))  # closing one current profit postition
                             del proffit_array[0]                                                            # deleting closed profit position from profit array
 
+            if step == 5:
+                prt(f'Founded: {open_sl}, Quantity: {quantity}' )
+                prt(f'Current: {current_price}, TP: {round(tp_price)}, SL: {round(stop_price)}')
     except:
         logger.error("Information about error: ", exc_info=True)
         prt('\n\nSomething went wrong. Continuig...')
@@ -144,10 +167,10 @@ def prt(message):
     """
     Function for sending information to telegram_bot
 
-    :param message:
+    :param message: sending message
     :type message: str
     """
-    telegram_bot_sendtext(pointer+': '+message, symbol, maxposition)
+    telegram_bot_sendtext(pointer+': '+message)
     print(pointer + ':   ' + message)
 
 
@@ -158,7 +181,7 @@ def prt(message):
 Body of program
 """
 starttime = time.time()                                     # getting start time
-timeout = time.time() + 60 * 60 * 24                        # time working boot = 24 hours
+timeout = time.time() + 60 * 60 * 24 * 7                    # time working boot = 24 hours
 counterr = 1                                                # initialization counter of sending current information
 
 while time.time() <= timeout:

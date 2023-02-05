@@ -3,13 +3,16 @@ import time
 from cred import bot_token, chat_id
 from binance_functions import get_opened_positions, open_position, close_position
 
+telegram_delay = 10     # time of working of the previous command from  telegram
 
-global symbol, maxposition
 
+def getTPSLfrom_telegram():
+    """
+    The function gets message from telegram and sends relevant commands to binance (open / close)
 
-telegram_delay = 13
-
-def getTPSLfrom_telegram(symbol, maxposition):
+    :return: message from telegram (str)
+    """
+    # Getting text information from telegram
     strr = f"https://api.telegram.org/bot{bot_token}/getUpdates"
     response = requests.get(strr)
     rs = response.json()
@@ -18,31 +21,19 @@ def getTPSLfrom_telegram(symbol, maxposition):
     textt = rs3['text']
     datet = rs3['date']
 
-    # print(textt, "\n")
-    # print(time.time(), datet, time.time()-datet, telegram_delay)
-
-    if (time.time() - datet) < telegram_delay:
-        print("pic")
-        if 'quit' in textt:
-            quit()
-        if 'exit' in textt:
-            exit()
-        if 'hello' in textt:
-            telegram_bot_sendtext('Hello, how are you?')
-        if 'open_short' in textt:
-            print(symbol, maxposition)
-            open_position(symbol, 'short', maxposition)
-        if 'open_long' in textt:
-            open_position(symbol, 'long', maxposition)
-        if 'close_pos' in textt:
-            position = get_opened_positions(symbol)
-            open_sl = position[0]
-            quantity = position[1]
-            close_position(symbol, open_sl, abs(quantity))
+    # Subcycle to recognition of information from telegram
+    if (time.time() - datet) < telegram_delay and textt in ('quit', 'exit', 'hello', 'open_short', 'open_long', 'close_pos'):
+        return textt
+    else:
+        return None
 
 
+def telegram_bot_sendtext(bot_message):
+    """
+    The function sends message to telegram
 
-def telegram_bot_sendtext(bot_message, symbol, maxposition):
+    :return: response information (json)
+    """
     bot_token2 = bot_token
     bot_chatID = chat_id
     send_text = f"https://api.telegram.org/bot{bot_token2}/sendMessage?chat_id={bot_chatID}&parse_mode=Markdown&text={bot_message}"
@@ -50,15 +41,3 @@ def telegram_bot_sendtext(bot_message, symbol, maxposition):
     return response.json()
 
 
-    starttime = time.time()
-    timeout = time.time() + 60*60*12
-    counterr = 1
-
-    while time.time() <= timeout:
-        try:
-            print("passthroug at "+time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-            getTPSLfrom_telegram(symbol, maxposition)
-            time.sleep(15 - ((time.time() - starttime) % 15.0))
-        except KeyboardInterrupt:
-            print('\n\nKeyboard exception received. Exiting')
-            exit()
