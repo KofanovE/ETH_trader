@@ -115,13 +115,13 @@ def main(step):
                 # Subcycle: not Stop Loss for Long deal
                 else:
                     temp_arr = copy.copy(proffit_array)                     # getting current profit array from new
+                    tp_current = entry_price + temp_arr[0][0]
                     # Getting of max step profit array
                     for j in range(0, len(temp_arr) - 1):
                         delta = temp_arr[j][0]
                         contracts = temp_arr[j][1]
-                        tp_price = entry_price + delta
                         # Subcycle: Take Profit for Long deal
-                        if current_price > tp_price:
+                        if current_price > entry_price + delta:
                             logger.info(f"Long -> Take Profit ({abs(round(maxposition * (contracts / 10), 3))}): {current_price} > {entry_price + delta}")
                             close_position(symbol, 'long', abs(round(maxposition * (contracts / 10), 3)))   # closing one current profit postition
                             del proffit_array[0]                                                            # deleting closed profit position from profit array
@@ -143,20 +143,20 @@ def main(step):
                 # Subcycle: not Stop Loss for Short deal
                 else:
                     temp_arr = copy.copy(proffit_array)                     # getting current profit array from new
+                    tp_current = entry_price - temp_arr[0][0]
                     # Getting of max step profit array
                     for j in range(0, len(temp_arr) - 1):
                         delta = temp_arr[j][0]
                         contracts = temp_arr[j][1]
-                        tp_price = entry_price - delta
                         # Subcycle: Take Profit for Short deal
-                        if current_price < tp_price:
+                        if current_price < entry_price - delta:
                             logger.info(f"Short -> Take Profit ({abs(round(maxposition * (contracts / 10), 3))}): {current_price} > {entry_price - delta}")
                             close_position(symbol, 'short', abs(round(maxposition * (contracts / 10), 3)))  # closing one current profit postition
                             del proffit_array[0]                                                            # deleting closed profit position from profit array
 
             if step == 5:
                 prt(f'Founded: {open_sl}, Quantity: {quantity}' )
-                prt(f'Current: {current_price}, TP: {round(tp_price)}, SL: {round(stop_price)}')
+                prt(f'Cur: {current_price}, TP: {round(tp_current, 2)}, SL: {round(stop_price, 2)}, Ent: {round(entry_price, 2)}')
     except:
         logger.error("Information about error: ", exc_info=True)
         prt('\n\nSomething went wrong. Continuig...')
